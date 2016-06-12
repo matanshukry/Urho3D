@@ -91,9 +91,9 @@ void Run(const Vector<String>& arguments)
     {
         SharedArrayPtr<unsigned char> data(new unsigned char[width * width]);
 
-        for (int y = 0; y < width; ++y)
+        for (unsigned y = 0; y < width; ++y)
         {
-            for (int x = 0; x < width; ++x)
+            for (unsigned x = 0; x < width; ++x)
             {
                 unsigned i = y * width + x;
 
