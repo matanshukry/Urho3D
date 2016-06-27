@@ -969,7 +969,7 @@ elseif(UNIX)    # Urho3D - at this point both UNIX and UNIX_SYS should be equiva
     endif ()
     check_include_file("libudev.h" HAVE_LIBUDEV_H)
     if (HAVE_LIBUDEV_H AND UDEV_H_INCLUDE_DIRS)
-      include_directories (${UDEV_H_INCLUDE_DIRS})
+      include_directories (SYSTEM ${UDEV_H_INCLUDE_DIRS})
     endif ()
     # Urho3D - bug fix - dbus/dbus.h is installed under path suffix 'dbus-1.0', so the following find_path() is needed even when not cross-compiling
     find_path (DBUS_H_INCLUDE_DIRS NAMES dbus/dbus.h PATH_SUFFIXES dbus-1.0)
@@ -983,7 +983,7 @@ elseif(UNIX)    # Urho3D - at this point both UNIX and UNIX_SYS should be equiva
     set (CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_UDEV_DBUS_SAVED} ${DBUS_H_INCLUDE_DIRS} ${DBUS_ARCH_DEPS_H_INCLUDE_DIRS})
     check_include_file("dbus/dbus.h" HAVE_DBUS_DBUS_H)
     if (HAVE_DBUS_DBUS_H AND DBUS_H_INCLUDE_DIRS AND DBUS_ARCH_DEPS_H_INCLUDE_DIRS)
-      include_directories (${DBUS_H_INCLUDE_DIRS} ${DBUS_ARCH_DEPS_H_INCLUDE_DIRS})
+      include_directories (SYSTEM ${DBUS_H_INCLUDE_DIRS} ${DBUS_ARCH_DEPS_H_INCLUDE_DIRS})
     endif ()
     set (CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_UDEV_DBUS_SAVED})
 
