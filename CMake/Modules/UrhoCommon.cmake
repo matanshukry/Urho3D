@@ -621,7 +621,7 @@ else ()
                 # Prior to version 1.31.3 emcc does not consistently add the cpp standard and remove Emscripten-specific compiler flags
                 # before passing on the work to the underlying LLVM/Clang compiler, this has resulted in preprocessing error when enabling the PCH and ccache
                 # (See https://github.com/kripken/emscripten/issues/3365 for more detail)
-                if (EMCC_VERSION VERSION_LESS 1.31.3)
+                if (EMSCRIPTEN_EMCC_VERSION VERSION_LESS 1.31.3)
                     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
                 endif ()
                 set (CMAKE_C_FLAGS_RELEASE "-Oz -DNDEBUG")

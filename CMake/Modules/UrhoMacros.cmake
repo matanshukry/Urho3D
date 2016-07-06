@@ -919,7 +919,7 @@ macro (setup_main_executable)
             get_filename_component (NAME ${FILE} NAME)
             list (APPEND PAK_NAMES ${NAME})
         endforeach ()
-        if (CMAKE_BUILD_TYPE STREQUAL Debug AND EMCC_VERSION VERSION_GREATER 1.32.2)
+        if (CMAKE_BUILD_TYPE STREQUAL Debug AND EMSCRIPTEN_EMCC_VERSION VERSION_GREATER 1.32.2)
             set (SEPARATE_METADATA --separate-metadata)
         endif ()
         add_custom_command (OUTPUT ${SHARED_RESOURCE_JS}.data
