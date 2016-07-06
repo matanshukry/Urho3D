@@ -248,35 +248,27 @@ else ()
                 set (URHO3D_RUN_RESULT 0)
                 file (READ ${URHO3D_BASE_INCLUDE_DIR}/Urho3D.h URHO3D_RUN_RESULT__TRYRUN_OUTPUT)
             endif ()
-            # Due to a bug in CMake where setting the CMAKE_EXECUTABLE_SUFFIX variable in the current local scope does not being honored by try_run(), we could not tell the command the correct suffix to expect (.js); it still thinks the suffix is empty string (as per Linux platform, see also comments in emscripten.toolchain.cmake module)
-            # Workaround it by just doing try_compile() and fake the run output which is anyway the case for all the cross-compiling cases
-            if (EMSCRIPTEN)
-                try_compile (URHO3D_COMPILE_RESULT ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR}/CheckUrho3DLibrary.cpp
-                    CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS} -DLINK_LIBRARIES:STRING=${URHO3D_LIBRARIES} -DINCLUDE_DIRECTORIES:STRING=${URHO3D_INCLUDE_DIRS} ${COMPILER_STATIC_DEFINE}
-                    OUTPUT_VARIABLE TRY_COMPILE_OUT)
-                set (TRY_RUN_OUT ${URHO3D_RUN_RESULT__TRYRUN_OUTPUT})
-            else ()
-                set (COMPILER_FLAGS "${COMPILER_32BIT_FLAG} ${CMAKE_REQUIRED_FLAGS}")
-                # FIXME: For yet an unknown reason, CMake seems to fail to setup the sysroot as expected here, so we have to set it manually
-                if (ANDROID)
-                    set (COMPILER_FLAGS "${COMPILER_FLAGS} --sysroot=\"${CMAKE_SYSROOT}\"")
-                endif ()
-                while (NOT URHO3D_COMPILE_RESULT)
-                    try_run (URHO3D_RUN_RESULT URHO3D_COMPILE_RESULT ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR}/CheckUrho3DLibrary.cpp
-                        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${COMPILER_FLAGS} -DLINK_LIBRARIES:STRING=${URHO3D_LIBRARIES} -DINCLUDE_DIRECTORIES:STRING=${URHO3D_INCLUDE_DIRS} ${COMPILER_STATIC_DEFINE} ${COMPILER_STATIC_RUNTIME_FLAGS}
-                        COMPILE_OUTPUT_VARIABLE TRY_COMPILE_OUT RUN_OUTPUT_VARIABLE TRY_RUN_OUT)
-                    if (MSVC AND NOT URHO3D_COMPILE_RESULT AND NOT COMPILER_STATIC_RUNTIME_FLAGS)
-                        # Give a second chance for MSVC to use static runtime flag
-                        if (URHO3D_LIBRARIES_REL)
-                            set (COMPILER_STATIC_RUNTIME_FLAGS COMPILE_DEFINITIONS /MT)
-                        else ()
-                            set (COMPILER_STATIC_RUNTIME_FLAGS COMPILE_DEFINITIONS /MTd)
-                        endif ()
-                    else ()
-                        break ()    # Other compilers break immediately rendering the while-loop a no-ops
-                    endif ()
-                endwhile ()
+            set (COMPILER_FLAGS "${COMPILER_32BIT_FLAG} ${CMAKE_REQUIRED_FLAGS}")
+            string (REPLACE .js ";" COMPILER_FLAGS "${COMPILER_FLAGS}")     # Emscripten-specific - revise SmileyHack to inject empty suffix to keep try_run() happy
+            # FIXME: For yet an unknown reason, CMake seems to fail to setup the sysroot as expected here, so we have to set it manually
+            if (ANDROID)
+                set (COMPILER_FLAGS "${COMPILER_FLAGS} --sysroot=\"${CMAKE_SYSROOT}\"")
             endif ()
+            while (NOT URHO3D_COMPILE_RESULT)
+                try_run (URHO3D_RUN_RESULT URHO3D_COMPILE_RESULT ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_LIST_DIR}/CheckUrho3DLibrary.cpp
+                    CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${COMPILER_FLAGS} -DLINK_LIBRARIES:STRING=${URHO3D_LIBRARIES} -DINCLUDE_DIRECTORIES:STRING=${URHO3D_INCLUDE_DIRS} ${COMPILER_STATIC_DEFINE} ${COMPILER_STATIC_RUNTIME_FLAGS}
+                    COMPILE_OUTPUT_VARIABLE TRY_COMPILE_OUT RUN_OUTPUT_VARIABLE TRY_RUN_OUT)
+                if (MSVC AND NOT URHO3D_COMPILE_RESULT AND NOT COMPILER_STATIC_RUNTIME_FLAGS)
+                    # Give a second chance for MSVC to use static runtime flag
+                    if (URHO3D_LIBRARIES_REL)
+                        set (COMPILER_STATIC_RUNTIME_FLAGS COMPILE_DEFINITIONS /MT)
+                    else ()
+                        set (COMPILER_STATIC_RUNTIME_FLAGS COMPILE_DEFINITIONS /MTd)
+                    endif ()
+                else ()
+                    break ()    # Other compilers break immediately rendering the while-loop a no-ops
+                endif ()
+            endwhile ()
             set (URHO3D_COMPILE_RESULT ${URHO3D_COMPILE_RESULT} CACHE INTERNAL "FindUrho3D module's compile result")
             if (URHO3D_COMPILE_RESULT AND URHO3D_RUN_RESULT EQUAL 0)
                 # Auto-discover build options used by the found library
